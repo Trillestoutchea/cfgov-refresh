@@ -32,12 +32,13 @@ from modelcluster.tags import ClusterTaggableManager
 
 from sheerlike.query import QueryFinder
 
-from .handlers import JSHandler
+from .handlers.js_handler import JSHandler
+from .handlers.filterable_list_handler import FilterableListHandler
 from .. import get_protected_url
 from ..atomic_elements import molecules, organisms
 from ..util import util, ref
 
-PAGE_HANDLERS = [JSHandler]
+PAGE_HANDLERS = [JSHandler, FilterableListHandler]
 
 
 
@@ -205,11 +206,14 @@ class CFGOVPage(Page):
                 return [util.get_appropriate_page_version(request, ancestor) for ancestor in ancestors[i+1:]]
         return []
 
+    def get_appropriate_children(self, hostname, inclusive=False):
+        return CFGOVPage.objects.child_of(self).live_shared(hostname)
+
     def get_appropriate_descendants(self, hostname, inclusive=True):
-        return CFGOVPage.objects.live_shared(hostname).descendant_of(self, inclusive)
+        return CFGOVPage.objects.descendant_of(self, inclusive).live_shared(hostname)
 
     def get_appropriate_siblings(self, hostname, inclusive=True):
-        return CFGOVPage.objects.live_shared(hostname).sibling_of(self, inclusive)
+        return CFGOVPage.objects.sibling_of(self, inclusive).live_shared(hostname)
 
     def get_next_appropriate_siblings(self, hostname, inclusive=False):
         return self.get_appropriate_siblings(hostname=hostname, inclusive=inclusive).filter(path__gte=self.path).order_by('path')
@@ -221,7 +225,7 @@ class CFGOVPage(Page):
         context = super(CFGOVPage, self).get_context(request, *args, **kwargs)
         for handler_class in PAGE_HANDLERS:
             handler = handler_class(self, request)
-            handler.process(context)
+            handler.handle(context)
         return context
 
     @property
