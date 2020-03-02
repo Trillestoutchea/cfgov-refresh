@@ -31,8 +31,7 @@ const constantsModel = {
           const rosetta = constantsModel.financialValues[key];
           financialModel.values[key] = constantsModel.values[rosetta];
         }
-
-        console.log( 'HEY' );
+        
         updateFinancialView();
 
       } );

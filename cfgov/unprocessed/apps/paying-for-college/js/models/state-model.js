@@ -17,8 +17,8 @@ const stateModel = {
   },
 
   init: () => {
-    // PLACEHOLDER - Add more interesting stuff later
-    stateModel.foo = 'bar';
+    // This is for state data that could initialized when the model is created
+    
   }
 
 };

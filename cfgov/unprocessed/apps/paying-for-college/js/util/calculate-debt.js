@@ -30,8 +30,6 @@ const calculateDebt = function( data ) {
 
   values = Object.assign( constantsModel.values, data );
 
-  console.log( 'after merge', values );
-
   for ( const key in modelToCalc ) {
     values[modelToCalc[key]] = getFinancialValue( key );
   }
@@ -43,8 +41,6 @@ const calculateDebt = function( data ) {
   values.programLength = getState( 'program' ).length;
   values.undergraduate = getState( 'program' ).type !== 'graduate';
   values.program = getState( 'program' ).type === 'graduate' ? 'grad' : 'ba';
-
-  console.log( 'before calc: ', values.DLOriginationFee );
 
   values = studentDebtCalculator( values );
 

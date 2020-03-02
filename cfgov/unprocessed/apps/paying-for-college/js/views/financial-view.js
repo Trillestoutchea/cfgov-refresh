@@ -3,7 +3,7 @@
 import numberToMoney from 'format-usd';
 import { closest } from '../../../../js/modules/util/dom-traverse';
 import { updateState } from '../dispatchers/update-state.js';
-import { createFinancial, updateFinancial, importSchoolToFinancial } from '../dispatchers/update-models.js';
+import { createFinancial, importSchoolToFinancial, updateFinancial } from '../dispatchers/update-models.js';
 import { getState } from '../dispatchers/get-state.js';
 import { getFinancialValue } from '../dispatchers/get-model-values.js';
 import { decimalToPercentString, stringToNum } from '../util/number-utils.js';

@@ -33,10 +33,10 @@ const init = function() {
 
   fixedSticky.init( '.costs-not-covered' );
 
-    // For testing purposes:
-    // navigationView.activateGetStartedBtn();
-    // navigationView._handleGetStartedBtnClick();
-    // updateState.activeSection( 'make-a-plan' );
+  /* For testing purposes:
+     navigationView.activateGetStartedBtn();
+     navigationView._handleGetStartedBtnClick();
+     updateState.activeSection( 'make-a-plan' ); */
 
 };
 
