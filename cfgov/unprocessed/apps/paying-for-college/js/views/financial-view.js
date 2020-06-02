@@ -226,16 +226,6 @@ const financialView = {
        5 ); */
   },
 
-  /**
-    * initializeFinancialValues - Create financial model values based on the input
-    * fields that exist in the financial view
-    */
-  initializeFinancialValues: function() {
-    this._financialItems.forEach( elem => {
-      createFinancial( elem.dataset.financialItem, 0 );
-    } );
-  },
-
   init: function( body ) {
     this._financialItems = document.querySelectorAll( '[data-financial-item]' );
     this._financialInputs = document.querySelectorAll( 'input[data-financial-item]' );
@@ -246,8 +236,6 @@ const financialView = {
     this._otherBorrowingButtons = document.querySelectorAll( '.other-borrowing-btns button' );
     this._addInputListeners();
     this._addButtonListeners();
-    this.initializeFinancialValues();
-
   }
 
 };

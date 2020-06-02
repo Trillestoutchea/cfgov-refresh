@@ -5,7 +5,7 @@ based on these costs.
 */
 
 import { getSchoolValue, getStateValue } from '../dispatchers/get-model-values.js';
-import { recalculateExpenses } from '../dispatchers/update-models.js';
+import { initializeFinancialValues, recalculateExpenses } from '../dispatchers/update-models.js';
 import { debtCalculator } from '../util/debt-calculator.js';
 import { setUrlQueryString } from '../util/url-parameter-utils.js';
 import { stringToNum } from '../util/number-utils.js';
@@ -32,7 +32,7 @@ const financialModel = {
    */
   setValue: ( name, value ) => {
     if ( financialModel.values.hasOwnProperty( name ) ) {
-      financialModel.values[name] = value;
+      financialModel.values[name] = stringToNum( value );
       financialModel.recalculate();
       setUrlQueryString();
     }
@@ -213,12 +213,15 @@ const financialModel = {
     * init - Initialize this model
     */
   init: () => {
+    initializeFinancialValues();
     // A few properties must be created manually here
     financialModel.createFinancialProperty( 'other_programLength' );
 
     // These are test values used only for development purposes.
 
     financialModel._calculateTotals();
+
+    console.log( financialModel.values );
 
   }
 };

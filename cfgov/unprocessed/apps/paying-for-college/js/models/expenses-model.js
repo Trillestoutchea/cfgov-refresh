@@ -38,7 +38,7 @@ const expensesModel = {
    * @param {Number} value - New value of property
    */
   setValue: ( name, value ) => {
-    expensesModel.values[name] = value;
+    expensesModel.values[name] = stringToNum( value );
     expensesModel.calculateTotals();
   },
 

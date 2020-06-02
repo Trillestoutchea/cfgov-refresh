@@ -8,11 +8,13 @@ import { expensesModel } from './models/expenses-model.js';
 import { expensesView } from './views/expenses-view.js';
 import { financialModel } from './models/financial-model.js';
 import { financialView } from './views/financial-view.js';
+import { getQueryVariables } from './util/url-parameter-utils.js';
 import { navigationView } from './views/navigation-view.js';
 import { schoolModel } from './models/school-model.js';
 import { schoolView } from './views/school-view.js';
 import { stateModel } from './models/state-model.js';
-import { updateSchoolData } from './dispatchers/update-models.js';
+import { tooltipsView } from './views/tooltips-view.js';
+import { updateSchoolData, updateModelsFromQueryString } from './dispatchers/update-models.js';
 import { updateState } from './dispatchers/update-state.js';
 
 /* init() - Initialize the app */
@@ -66,14 +68,19 @@ const init = function() {
   stateModel.init();
   constantsModel.init();
   expensesModel.init();
+  financialModel.init();
+
+  console.log( 'qVars', getQueryVariables() );
+
+  updateModelsFromQueryString( getQueryVariables() );
+
   schoolView.init( body );
   expensesView.init( body );
   financialView.init( body );
   navigationView.init( body );
   chartView.init( body );
+  tooltipsView.init();
   Expandable.init();
-
-  financialModel.init();
 
   financialView.updateFinancialItems();
 

@@ -28,7 +28,6 @@ const stateModel = {
     } else if ( value !== stateModel.values.activeSection ) {
       stateModel.values.activeSection = value;
       window.history.pushState( this.values, null, '' );
-      console.log( 'pushState fired: ' + this.values.activeSection );
       updateNavigationView();
     }
     setUrlQueryString();
@@ -63,7 +62,6 @@ const stateModel = {
   _handlePopState: function( event ) {
     console.log( '_handlePopState fired!' );
     if ( event.state ) {
-      console.log( event.state );
       // window.history.replaceState( this.values, null, '' );
       stateModel.values.activeSection = event.state.activeSection;
       // stateModel.setValue( 'activeSection', event.state.activeSection );
@@ -77,6 +75,7 @@ const stateModel = {
     window.history.replaceState( this.values, null, '' );
     this.stateDomElem = document.querySelector( 'main.college-costs' );
     this._addPopStateListener();
+
   }
 
 };

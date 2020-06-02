@@ -5,6 +5,20 @@ import { schoolModel } from '../models/school-model.js';
 import { stateModel } from '../models/state-model.js';
 
 
+function getQueryVariables() {
+    const query = window.location.search.substring( 1 );
+    const pairs = query.split( '&' );
+    let queryVariables = {};
+    pairs.forEach( elem => {
+    	let pair = elem.split( '=' );
+    	let key = decodeURIComponent( pair[0] );
+    	let value = decodeURIComponent( pair[1] );
+    	queryVariables[key] = value;
+    } );
+
+    return queryVariables;
+}
+
 function _buildUrlQueryString() {
 	const expensesValues = expensesModel.values;
 	const financialValues = financialModel.values;
@@ -80,7 +94,9 @@ function _buildUrlQueryString() {
 		pvf1: financialValues.privloan_privLoanFee1,
 
 		plus: financialValues.fedLoan_parentPlus,
+	};
 
+	let expensesVariables = {
 		houx: expensesValues.item_housing,
 		fdx: expensesValues.item_food,
 		clhx: expensesValues.item_clothing,
@@ -92,11 +108,17 @@ function _buildUrlQueryString() {
 		chcx: expensesValues.item_childcare,
 		othx: expensesValues.item_other,
 		dbtx: expensesValues.item_currentDebt
-	};
+	}
 
 	if ( stateValues.program_type === 'graduate' ) {
 		variables.plus = financialValues.loan_gradPlus;
 	}
+
+	// TODO: Don't bother putting expenses in the URL if they equal the default
+	// for ( let val in expensesVariables ) {
+	// CHECK IF THE VALUE HAS CHANGED FROM THE DEFAULT
+	// }
+
 
 	for ( let key in variables ) {
 		if ( typeof variables[key] !== 'undefined' && variables[key] !== 0 && variables[key] !== null ) {
@@ -104,8 +126,6 @@ function _buildUrlQueryString() {
 			query += key + '=' + variables[key];
 		}
 	}
-
-	console.log( query );
 
 	return query;
 
@@ -115,175 +135,91 @@ function setUrlQueryString() {
 	window.history.replaceState( stateModel.values, null, _buildUrlQueryString() );
 }
 
-const variableToUrl = {
-	schoolModel: {
-		schoolID : 'iped',
-		PID : 'pid',
-		oid : 'oid',		
-	},
+function urlToVariables() {
 
-	stateModel: {
-		program_housing : 'houp',
-		program_type : 'typp',
-		program_length : 'lenp',
-		program_rate : 'ratp',
-		program_dependent : 'depp',
-	},
 
-	state_costs : 'cobs',
-	state_region : 'regs',
 
-	dirCost_tuition : 'tuit',
-	dirCost_housing : 'hous',
-	dirCost_other : 'diro',
+	// iped: 'schoolID',
+	// pid: 'PID',
+	// oid: 'oid',
+	// houp: 'program_housing',
+	// typp: 'program_type',
+	// lenp: 'program_length',
+	// ratp: 'program_rate',
+	// depp: 'program_dependent',
+	// cobs: 'state_costs',
+	// regs: 'state_region',
 
-	indiCost_books : 'book',
-	indiCost_other : 'indo',
-	indiCost_added : 'nda',
+	// tuit: 'dirCost_tuition',
+	// hous: 'dirCost_housing',
+	// diro: 'dirCost_other',
 
-	grant_pell : 'pelg',
-	grant_seog : 'seog',
-	grant_federal : 'fedg',
-	grant_state : 'stag',
-	grant_school : 'schg',
-	grant_other : 'othg',
+	// book: 'indiCost_books',
+	// indo: 'indiCost_other',
+	// nda: 'indiCost_added',
 
-	mil_milTuitAssist : 'mta',
-	mil_GIBill : 'gi',
-	mil_other : 'othm',
+	// pelg: 'grant_pell',
+	// seog: 'grant_seog',
+	// fedg: 'grant_federal',
+	// stag: 'grant_state',
+	// schg: 'grant_school',
+	// othg: 'grant_other',
 
-	scholarship_state : 'stas',
-	scholarship_school : 'schs',
-	scholarship_other : 'oths',
+	// mta: 'mil_milTuitAssist',
+	// gi: 'mil_GIBill',
+	// othm: 'mil_other',
 
-	workStudy_workStudy : 'wkst',
+	// stas: 'scholarship_state',
+	// schs: 'scholarship_school',
+	// oths: 'scholarship_other',
 
-	fund_fellowship : 'fell',
-	fund_assistantship : 'asst',
+	// wkst: 'workStudy_workStudy',
 
-	fedLoan_directSub : 'subl',
-	fedLoan_directUnsub : 'unsl',
+	// fell: 'fund_fellowship',
+	// asst: 'fund_assistantship',
 
-	instiLoan_institutional : 'insl',
-	rate_institutionalLoan : 'insr',
-	fee_institutionalLoan : 'insf',
-	loan_stateLoan : 'stal',
-	rate_stateLoan : 'star',
-	fee_stateLoan : 'staf',
-	loan_nonprofitLoan : 'npol',
-	rate_nonprofitLoan : 'npor',
-	fee_nonprofitLoan : 'npof',
+	// subl: 'fedLoan_directSub',
+	// unsl: 'fedLoan_directUnsub',
 
-	savings_personal : 'pers',
-	savings_family : 'fams',
-	savings_529 : '529p',
+	// insl: 'instiLoan_institutional',
+	// insr: 'rate_institutionalLoan',
+	// insf: 'fee_institutionalLoan',
+	// stal: 'loan_stateLoan',
+	// star: 'rate_stateLoan',
+	// staf: 'fee_stateLoan',
+	// npol: 'loan_nonprofitLoan',
+	// npor: 'rate_nonprofitLoan',
+	// npof: 'fee_nonprofitLoan',
 
-	income_jobOffCampus : 'offj',
-	income_jobOnCampus : 'onj',
-	income_employerAssist : 'eta',
-	income_other : 'othf',
+	// pers: 'savings_personal',
+	// fams: 'savings_family',
+	// '529p': 'savings_529',
 
-	privLoan_privLoan1 : 'pvl1',
-	privloan_privLoanRate1 : 'pvr1',
-	privloan_privLoanFee1 : 'pvf1',
+	// offj: 'income_jobOffCampus',
+	// onj: 'income_jobOnCampus',
+	// eta: 'income_employerAssist',
+	// othf: 'income_other',
 
-	fedLoan_parentPlus : 'plus',
+	// pvl1: 'privLoan_privLoan1',
+	// pvr1: 'privloan_privLoanRate1',
+	// pvf1: 'privloan_privLoanFee1',
 
-	item_housing : 'houx',
-	item_food : 'fdx',
-	item_clothing : 'clhx',
-	item_transportation : 'trnx',
-	item_healthcare : 'hltx',
-	item_entertainment : 'entx',
-	item_retirement : 'retx',
-	item_taxes : 'taxx',
-	item_childcare : 'chcx',
-	item_other : 'othx',
-	item_currentDebt: 'dbtx',
-}
+	// plus: 'fedLoan_parentPlus',
 
-const urlToVariable = {
-
-	iped: 'schoolID',
-	pid: 'PID',
-	oid: 'oid',
-	houp: 'program_housing',
-	typp: 'program_type',
-	lenp: 'program_length',
-	ratp: 'program_rate',
-	depp: 'program_dependent',
-	cobs: 'state_costs',
-	regs: 'state_region',
-
-	tuit: 'dirCost_tuition',
-	hous: 'dirCost_housing',
-	diro: 'dirCost_other',
-
-	book: 'indiCost_books',
-	indo: 'indiCost_other',
-	nda: 'indiCost_added',
-
-	pelg: 'grant_pell',
-	seog: 'grant_seog',
-	fedg: 'grant_federal',
-	stag: 'grant_state',
-	schg: 'grant_school',
-	othg: 'grant_other',
-
-	mta: 'mil_milTuitAssist',
-	gi: 'mil_GIBill',
-	othm: 'mil_other',
-
-	stas: 'scholarship_state',
-	schs: 'scholarship_school',
-	oths: 'scholarship_other',
-
-	wkst: 'workStudy_workStudy',
-
-	fell: 'fund_fellowship',
-	asst: 'fund_assistantship',
-
-	subl: 'fedLoan_directSub',
-	unsl: 'fedLoan_directUnsub',
-
-	insl: 'instiLoan_institutional',
-	insr: 'rate_institutionalLoan',
-	insf: 'fee_institutionalLoan',
-	stal: 'loan_stateLoan',
-	star: 'rate_stateLoan',
-	staf: 'fee_stateLoan',
-	npol: 'loan_nonprofitLoan',
-	npor: 'rate_nonprofitLoan',
-	npof: 'fee_nonprofitLoan',
-
-	pers: 'savings_personal',
-	fams: 'savings_family',
-	'529p': 'savings_529',
-
-	offj: 'income_jobOffCampus',
-	onj: 'income_jobOnCampus',
-	eta: 'income_employerAssist',
-	othf: 'income_other',
-
-	pvl1: 'privLoan_privLoan1',
-	pvr1: 'privloan_privLoanRate1',
-	pvf1: 'privloan_privLoanFee1',
-
-	plus: 'fedLoan_parentPlus',
-
-	houx: 'item_housing',
-	fdx: 'item_food',
-	clhx: 'item_clothing',
-	trnx: 'item_transportation',
-	hltx: 'item_healthcare',
-	entx: 'item_entertainment',
-	retx: 'item_retirement',
-	taxx: 'item_taxes',
-	chcx: 'item_childcare',
-	othx: 'item_other',
-	dbtx: 'item_currentDebt'
+	// houx: 'item_housing',
+	// fdx: 'item_food',
+	// clhx: 'item_clothing',
+	// trnx: 'item_transportation',
+	// hltx: 'item_healthcare',
+	// entx: 'item_entertainment',
+	// retx: 'item_retirement',
+	// taxx: 'item_taxes',
+	// chcx: 'item_childcare',
+	// othx: 'item_other',
+	// dbtx: 'item_currentDebt'
 }
 
 export {
+	getQueryVariables,
 	setUrlQueryString
 }
