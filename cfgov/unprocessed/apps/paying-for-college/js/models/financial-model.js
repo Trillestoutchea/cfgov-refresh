@@ -4,11 +4,11 @@ of college, grants, loans, etc. It also includes debt calculations
 based on these costs.
 */
 
-import { getSchoolValue, getStateValue } from '../dispatchers/get-model-values.js';
+import { getConstantsValue, getSchoolValue, getStateValue } from '../dispatchers/get-model-values.js';
 import { initializeFinancialValues, recalculateExpenses } from '../dispatchers/update-models.js';
 import { debtCalculator } from '../util/debt-calculator.js';
 import { setUrlQueryString } from '../util/url-parameter-utils.js';
-import { stringToNum } from '../util/number-utils.js';
+import { stringToNum, enforceRange } from '../util/number-utils.js';
 
 // Please excuse some uses of underscore for code/HTML property clarity!
 /* eslint camelcase: ["error", {properties: "never"}] */
@@ -57,85 +57,96 @@ const financialModel = {
    */
   recalculate: () => {
     financialModel._calculateTotals();
-    financialModel._calculateDebt();
+    debtCalculator();
     recalculateExpenses();
+  },
+
+  /*
+   * _enforceLimits - Check and enforce various limits on federal loans
+   * and grants
+   * @returns {Object} An object of errors found during enforcement
+   */
+
+  _enforceLimits: () => {
+    // Determine unsubsidized cap based on status
+    let unsubCapKey = 'unsubsidizedCapYearOne';
+    if ( getStateValue( 'programType' ) === 'graduate' ) {
+      unsubCapKey = 'unsubsidizedCapGrad';
+    } else if ( getStateValue( 'programDependency' ) === 'independent' ) {
+      unsubCapKey = 'unsubsidizedCapIndepYearOne';
+    }
+
+    const limits = {
+      grant_pell: [ 0, getConstantsValue( 'pellCap' ) ],
+      grant_mta: [ 0, getConstantsValue( 'militaryAssistanceCap' ) ],
+      fedLoan_directSub: [ 0, getConstantsValue( 'subsidizedCapYearOne' ) ],
+      fedLoan_directUnsub: [ 0, getConstantsValue( unsubCapKey ) ]
+    };
+    let errors = {};
+
+    for ( let key in limits ) {
+      const result = enforceRange( financialModel.values[key], limits[key][0], limits[key][1] );      
+      financialModel.values[key] = result.value;
+      if ( result.error !== false ) {
+        errors[key] = result.error;
+      }
+    }
+
+    return errors;
+
   },
 
   /**
    * _calculateTotals - Recalculate all relevant totals
    */
   _calculateTotals: () => {
-    // TODO: Completely refactor this method
-    let totalDirectCosts = 0;
-    let totalIndirectCosts = 0;
-    let totalGrants = 0;
-    let totalScholarships = 0;
-    let totalFellowAssist = 0;
-    let totalFedLoans = 0;
-    let totalLoans = 0;
-    let totalSavings = 0;
-    let totalIncome = 0;
-    let totalContributions = 0;
-    let totalOtherLoans = 0;
-    let totalWorkStudy = 0;
-    const totalPrivateLoans = 0;
+    let vals = financialModel.values;
+    let totals = {
+      dirCost : 'total_directCosts',
+      indiCost : 'total_indirectCosts',
+      grant : 'total_grants',
+      scholarship : 'total_scholarships',
+      savings : 'total_savings',
+      fellowAssist : 'total_fellowAssist',
+      income : 'total_income',
+      fedLoan : 'total_fedLoans',
+      loan : 'total_otherLoans',
+      workStud : 'total_workStudy'
+    }
+
+    // Reset all totals to 0
+    for ( let key in totals ) {
+      vals[ totals[key] ] = 0;
+    }
+
+    // Enforce the limits
+    let errors = financialModel._enforceLimits();
 
     // Calculate totals
-    for ( const prop in financialModel.values ) {
-      const value = financialModel.values[prop];
-      if ( prop.substring( 0, 9 ) === 'indiCost_' ) {
-        totalIndirectCosts += value;
-      } else if ( prop.substring( 0, 8 ) === 'dirCost_' ) {
-        totalDirectCosts += value;
-      } else if ( prop.substring( 0, 6 ) === 'grant_' ) {
-        totalGrants += value;
-      } else if ( prop.substring( 0, 12 ) === 'scholarship_' ) {
-        totalScholarships += value;
-      } else if ( prop.substring( 0, 8 ) === 'savings_' ) {
-        totalSavings += value;
-      } else if ( prop.substring( 0, 12 ) === 'fellowAssist' ) {
-        totalFellowAssist += value;
-      } else if ( prop.substring( 0, 7 ) === 'income_' ) {
-        totalIncome += value;
-      } else if ( prop.substring( 0, 8 ) === 'fedLoan_' ) {
-        totalFedLoans += value;
-      } else if ( prop.substring( 0, 10 ) === 'loan_' ) {
-        totalOtherLoans += value;
-      } else if ( prop.substring( 0, 10 ) === 'workStudy_' ) {
-        totalWorkStudy += value;
+    for ( const prop in vals ) {
+      const prefix = prop.split( '_' )[0];
+      if ( totals.hasOwnProperty( prefix ) ) {
+        vals[ totals[prefix] ] += vals[prop];
       }
     }
 
     // Calculate more totals
-    totalContributions = totalGrants + totalScholarships + totalSavings + totalIncome + totalWorkStudy;
-    totalLoans = totalFedLoans + totalPrivateLoans + totalOtherLoans;
-
-    // Update the model
-    financialModel.values.total_directCosts = totalDirectCosts;
-    financialModel.values.total_indirectCosts = totalIndirectCosts;
-    financialModel.values.total_grants = totalGrants;
-    financialModel.values.total_scholarships = totalScholarships;
-    financialModel.values.total_savings = totalSavings;
-    financialModel.values.total_income = totalIncome;
-    financialModel.values.total_costs = totalDirectCosts + totalIndirectCosts;
-    financialModel.values.total_grantsScholarships = totalGrants + totalScholarships;
-    financialModel.values.total_fellowAssist = totalFellowAssist;
-    financialModel.values.total_workStudy = totalWorkStudy;
-    financialModel.values.total_otherResources = totalSavings + totalIncome;
-    financialModel.values.total_fedLoans = totalFedLoans;
-    financialModel.values.total_otherLoans = totalOtherLoans;
-    financialModel.values.total_borrowing = totalLoans;
-    financialModel.values.total_funding = totalContributions + totalLoans;
-    financialModel.values.total_gap = financialModel.values.total_costs -
-      financialModel.values.total_funding;
+    vals.total_borrowing = vals.total_fedLoans + vals.total_otherLoans;
+    vals.total_contributions = vals.total_grants + vals.total_scholarships + vals.total_savings
+        + vals.total_workStudy;
+    vals.total_costs = vals.total_directCosts + vals.total_indirectCosts;
+    vals.total_grantsScholarships = vals.total_grantsScholarships + vals.total_scholarships;
+    vals.total_otherResources = vals.total_savings + vals.total_income;
+    vals.total_funding = vals.total_contributions + vals.total_borrowing;
+    vals.total_gap = vals.total_costs - vals.total_funding;
 
     /* Borrowing total
        TODO - Update this once year-by-year DIRECT borrowing is in place */
-    financialModel.values.total_borrowingAtGrad = totalLoans * financialModel.values.other_programLength;
+    vals.total_borrowingAtGrad = vals.total_borrowing * vals.other_programLength;
 
 
-    if ( financialModel.values.total_gap < 0 ) {
-      financialModel.values.total_gap = 0;
+    if ( vals.total_gap < 0 ) {
+      vals.total_gap = 0;
     }
 
   },
@@ -198,18 +209,6 @@ const financialModel = {
   },
 
   /**
-   * calculateDebt - Recalculate the values of loan debt
-   */
-  _calculateDebt: () => {
-    const debtObject = debtCalculator( financialModel.values );
-    for ( const key in debtObject ) {
-      if ( debtObject.hasOwnProperty( key ) ) {
-        financialModel.values[key] = debtObject[key];
-      }
-    }
-  },
-
-  /**
     * init - Initialize this model
     */
   init: () => {
@@ -220,8 +219,6 @@ const financialModel = {
     // These are test values used only for development purposes.
 
     financialModel._calculateTotals();
-
-    console.log( financialModel.values );
 
   }
 };

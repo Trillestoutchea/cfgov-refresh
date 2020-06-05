@@ -227,21 +227,6 @@
 
                 <h3 class="program-question">
                     Are you considered a dependent or independent student?
-                    <div class="tooltip-container" data-tooltip>
-                        <button class="tooltip_button" type="button" aria-label="more info">
-                            <span class="u-visually-hidden">More information</span>
-                            {{ svg_icon('information-round') }}
-                        </button>
-                         <div class="hidden" role="status" aria-live="polite" data-tooltip-content>
-                            <p>Your dependency status determines whose information you must report on the Free Application for Federal Student Aid (FAFSA®) form.</p>
-                            <ul>
-                                <li>If you’re a dependent student, you will report your and your parents’ information.</li>
-                                <li>If you’re an independent student, you will report your own information (and, if you’re married, your spouse’s).</li>
-                            </ul>
-                            <p>From: https://studentaid.gov/apply-for-aid/fafsa/filling-out/dependency</p>
-                        </div>
-                    </div>
-
                 </h3>
                 <div class="m-form-field m-form-field__radio">
                     <input id="program-dependency-radio_dependent" type="radio" name="program-dependency" data-state-item="programDependency" class="a-radio" value="dependent">
@@ -912,7 +897,7 @@
                     <label class="form-label" for="loans__schoolLoanRate">Interest rate (%)</label>
                 </div>
                 <div class="financial-item_input-wrapper">
-                    <input id="loans__schoolLoanRate" name="loans__schoolLoanRate" data-financial-item="rate_institutionalLoan" value="9.99%">
+                    <input id="loans__schoolLoanRate" name="loans__schoolLoanRate" data-financial-item="rate_institutional" value="9.99%">
                 </div>
             </div>
             <div class="financial-item form-group_item">
@@ -920,7 +905,7 @@
                     <label class="form-label" for="loans__schoolLoanFee">Loan fee (%)</label>
                 </div>
                 <div class="financial-item_input-wrapper">
-                    <input id="loans__schoolLoanFee" name="loans__schoolLoanFee" data-financial-item="fee_institutionalLoan" value="9.99%">
+                    <input id="loans__schoolLoanFee" name="loans__schoolLoanFee" data-financial-item="fee_institutional" value="9.99%">
                 </div>
             </div>
 
@@ -1699,7 +1684,7 @@
                                 <label class="form-label" for="plan__schoolLoanRate">Interest rate (%)</label>
                             </div>
                             <div class="financial-item_input-wrapper">
-                                <input id="plan__schoolLoanRate" name="plan__schoolLoanRate" data-financial-item="rate_institutionalLoan" value="9.99%">
+                                <input id="plan__schoolLoanRate" name="plan__schoolLoanRate" data-financial-item="rate_institutional" value="9.99%">
                             </div>
                         </div>
                         <div class="financial-item form-group_item">
@@ -1707,7 +1692,7 @@
                                 <label class="form-label" for="plan__schoolLoanFee">Loan fee (%)</label>
                             </div>
                             <div class="financial-item_input-wrapper">
-                                <input id="plan__schoolLoanFee" name="plan__schoolLoanFee" data-financial-item="fee_institutionalLoan" value="9.99%">
+                                <input id="plan__schoolLoanFee" name="plan__schoolLoanFee" data-financial-item="fee_institutional" value="9.99%">
                             </div>
                         </div>
                         <div class="financial-item form-group_item">
@@ -2469,7 +2454,7 @@
                                 </label>
                             </div>
                             <div class="financial-item_input-wrapper">
-                                <span type="text" class="financial-item" data-financial-item="privLoan_privLoan" ></span>
+                                <span type="text" class="financial-item" data-financial-item="loan_privLoan" ></span>
                             </div>
                         </div>
                         <div class="financial-item form-group_item">

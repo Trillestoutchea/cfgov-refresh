@@ -48,7 +48,34 @@ function decimalToPercentString( number, decimalPlaces ) {
         minimumFractionDigits: decimalPlaces } );
 }
 
+function enforceRange( n, min, max ) {
+  let error = false;
+
+  if ( typeof min === 'undefined' ) min = false;
+  if ( typeof max === 'undefined' ) max = false;
+
+  if ( max < min || typeof n !== typeof min ) {
+    return false;
+  }
+
+  if ( n > max && max !== false ) {
+    n = max;
+    error = 'max';
+  }
+
+  if ( n < min && min !== false ) {
+    n = min;
+    error = 'min'
+  }
+
+  return {
+    value: n,
+    error: error
+  };
+}
+
 export {
+  enforceRange,
   stringToNum,
   decimalToPercentString
 };

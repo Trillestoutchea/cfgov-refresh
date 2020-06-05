@@ -65,6 +65,9 @@ const updateSchoolData = function( iped ) {
         financialModel.setValue( 'salary_annual', stringToNum( getSchoolValue( 'medianAnnualPay6Yr' ) ) );
         financialModel.setValue( 'salary_monthly', stringToNum( getSchoolValue( 'medianAnnualPay6Yr' ) ) / 12 );
 
+        console.log( schoolModel.values );
+        schoolView.updateWithSchoolData();
+
         resolve( true );
 
       } )
@@ -98,10 +101,19 @@ function updateModelsFromQueryString( queryObj ) {
     if ( _urlParamsToModelVars.hasOwnProperty( key ) ) {
       let match = _urlParamsToModelVars[key].split( '.' );
       modelMatch[match[0]]( match[1], queryObj[key ] );
+
+      // If there's an iped, do a fetch of the schoolData
+      if ( key === 'iped' ) {
+        updateSchoolData( queryObj[key] );
+      }
+
+      // If it's one of the program detail radio buttons, click it
+      if ( match[0] == 'stateModel' && match[1].indexOf( 'program' ) === 0 ) {
+        schoolView.clickRadioButton( match[1], queryObj[key] );
+      }
     }
   }
 
-  console.log( financialModel.values );
 }
 
 const _urlParamsToModelVars = {
@@ -109,13 +121,13 @@ const _urlParamsToModelVars = {
   pid: 'schoolModel.PID',
   oid: 'schoolModel.oid',
 
-  houp: 'stateModel.program_housing',
-  typp: 'stateModel.program_type',
-  lenp: 'stateModel.program_length',
-  ratp: 'stateModel.program_rate',
-  depp: 'stateModel.program_dependent',
-  cobs: 'stateModel.state_costs',
-  regs: 'stateModel.state_region',
+  houp: 'stateModel.programHousing',
+  typp: 'stateModel.programType',
+  lenp: 'stateModel.programLength',
+  ratp: 'stateModel.programRate',
+  depp: 'stateModel.programDependent',
+  cobs: 'stateModel.stateCosts',
+  regs: 'stateModel.stateRegion',
 
   tuit: 'financialModel.dirCost_tuition',
   hous: 'financialModel.dirCost_housing',

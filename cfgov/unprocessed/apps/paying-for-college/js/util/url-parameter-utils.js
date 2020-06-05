@@ -5,6 +5,11 @@ import { schoolModel } from '../models/school-model.js';
 import { stateModel } from '../models/state-model.js';
 
 
+/*
+ * getQueryVariables - Check the url for queryString and interpret it into an object
+ * full of key-value pairs.
+ * @returns {Object} key-value pairs of the queryString
+ */
 function getQueryVariables() {
     const query = window.location.search.substring( 1 );
     const pairs = query.split( '&' );
@@ -19,6 +24,12 @@ function getQueryVariables() {
     return queryVariables;
 }
 
+/* 
+ * _buildUrlQueryString - Retreieve values from the models and transform them into a 
+ * querystring
+ * @returns {String} a formatted query string based on model values
+ */
+
 function _buildUrlQueryString() {
 	const expensesValues = expensesModel.values;
 	const financialValues = financialModel.values;
@@ -31,13 +42,13 @@ function _buildUrlQueryString() {
 		pid: schoolValues.pid,
 		oid: schoolValues.oid,
 
-		houp: stateValues.program_housing,
-		typp: stateValues.program_type,
-		lenp: stateValues.program_length,
-		ratp: stateValues.program_rate,
-		depp: stateValues.program_dependent,
-		cobs: stateValues.state_costs, // TODO: What is this value?
-		regs: stateValues.state_region,
+		houp: stateValues.programHousing,
+		typp: stateValues.programType,
+		lenp: stateValues.programLength,
+		ratp: stateValues.programRate,
+		depp: stateValues.programDependent,
+		cobs: stateValues.stateCosts, // TODO: What is this value?
+		regs: stateValues.stateRegion,
 
 		tuit: financialValues.dirCost_tuition,
 		hous: financialValues.dirCost_housing,
@@ -131,92 +142,12 @@ function _buildUrlQueryString() {
 
 }
 
+/*
+ * setUrlQueryString - Replaces current state, adding the formatted querystring as the URL
+ */
+
 function setUrlQueryString() {
 	window.history.replaceState( stateModel.values, null, _buildUrlQueryString() );
-}
-
-function urlToVariables() {
-
-
-
-	// iped: 'schoolID',
-	// pid: 'PID',
-	// oid: 'oid',
-	// houp: 'program_housing',
-	// typp: 'program_type',
-	// lenp: 'program_length',
-	// ratp: 'program_rate',
-	// depp: 'program_dependent',
-	// cobs: 'state_costs',
-	// regs: 'state_region',
-
-	// tuit: 'dirCost_tuition',
-	// hous: 'dirCost_housing',
-	// diro: 'dirCost_other',
-
-	// book: 'indiCost_books',
-	// indo: 'indiCost_other',
-	// nda: 'indiCost_added',
-
-	// pelg: 'grant_pell',
-	// seog: 'grant_seog',
-	// fedg: 'grant_federal',
-	// stag: 'grant_state',
-	// schg: 'grant_school',
-	// othg: 'grant_other',
-
-	// mta: 'mil_milTuitAssist',
-	// gi: 'mil_GIBill',
-	// othm: 'mil_other',
-
-	// stas: 'scholarship_state',
-	// schs: 'scholarship_school',
-	// oths: 'scholarship_other',
-
-	// wkst: 'workStudy_workStudy',
-
-	// fell: 'fund_fellowship',
-	// asst: 'fund_assistantship',
-
-	// subl: 'fedLoan_directSub',
-	// unsl: 'fedLoan_directUnsub',
-
-	// insl: 'instiLoan_institutional',
-	// insr: 'rate_institutionalLoan',
-	// insf: 'fee_institutionalLoan',
-	// stal: 'loan_stateLoan',
-	// star: 'rate_stateLoan',
-	// staf: 'fee_stateLoan',
-	// npol: 'loan_nonprofitLoan',
-	// npor: 'rate_nonprofitLoan',
-	// npof: 'fee_nonprofitLoan',
-
-	// pers: 'savings_personal',
-	// fams: 'savings_family',
-	// '529p': 'savings_529',
-
-	// offj: 'income_jobOffCampus',
-	// onj: 'income_jobOnCampus',
-	// eta: 'income_employerAssist',
-	// othf: 'income_other',
-
-	// pvl1: 'privLoan_privLoan1',
-	// pvr1: 'privloan_privLoanRate1',
-	// pvf1: 'privloan_privLoanFee1',
-
-	// plus: 'fedLoan_parentPlus',
-
-	// houx: 'item_housing',
-	// fdx: 'item_food',
-	// clhx: 'item_clothing',
-	// trnx: 'item_transportation',
-	// hltx: 'item_healthcare',
-	// entx: 'item_entertainment',
-	// retx: 'item_retirement',
-	// taxx: 'item_taxes',
-	// chcx: 'item_childcare',
-	// othx: 'item_other',
-	// dbtx: 'item_currentDebt'
 }
 
 export {

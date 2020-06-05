@@ -1,10 +1,10 @@
 // This file contains the 'view' of all financial info, including costs, loans, etc
 
-import { updateAffordingChart, updateCostOfBorrowingChart, updateMakePlanChart, updateMaxDebtChart } from '../dispatchers/update-view.js';
+import { updateAffordingChart, updateCostOfBorrowingChart, updateExpensesView, updateMakePlanChart, updateMaxDebtChart } from '../dispatchers/update-view.js';
 import numberToMoney from 'format-usd';
 import { bindEvent } from '../../../../js/modules/util/dom-events';
 import { closest } from '../../../../js/modules/util/dom-traverse';
-import { createFinancial, recalculateFinancials, updateExpensesView, updateFinancial, updateFinancialsFromSchool } from '../dispatchers/update-models.js';
+import { createFinancial, recalculateFinancials, updateFinancial, updateFinancialsFromSchool } from '../dispatchers/update-models.js';
 import { decimalToPercentString, stringToNum } from '../util/number-utils.js';
 import { getFinancialValue, getStateValue } from '../dispatchers/get-model-values.js';
 import { updateState } from '../dispatchers/update-state.js';
@@ -226,6 +226,9 @@ const financialView = {
        5 ); */
   },
 
+  /*
+   * init - Initialize the financialView object
+   */
   init: function( body ) {
     this._financialItems = document.querySelectorAll( '[data-financial-item]' );
     this._financialInputs = document.querySelectorAll( 'input[data-financial-item]' );

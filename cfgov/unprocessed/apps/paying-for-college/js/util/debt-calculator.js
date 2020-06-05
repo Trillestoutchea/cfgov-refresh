@@ -3,68 +3,100 @@
  */
 
 import studentDebtCalculator from 'student-debt-calc';
-import { getFinancialValue, getStateValue } from '../dispatchers/get-model-values.js';
+import { calcDebtAtGrad, calcMonthlyPayment } from './debt-utils.js';
+import { getConstantsValue, getFinancialValue, getStateValue } from '../dispatchers/get-model-values.js';
 import { constantsModel } from '../models/constants-model.js';
 import { financialModel } from '../models/financial-model.js';
+import { updateFinancial, updateFinancialsFromSchool } from '../dispatchers/update-models.js';
 
 // Please excuse some uses of underscore for code/HTML property clarity!
 /* eslint camelcase: ["error", {properties: "never"}] */
 
-const debtCalculator = function( data ) {
-  let values = {};
 
-  const debtObj = {
-    debt_totalAtGrad: 0,
-    debt_tenYearTotal: 0,
-    debt_tenYearMonthly: 0,
-    debt_tenYearInterest: 0,
-    debt_twentyFiveYearTotal: 0,
-    debt_twentyFiveYearMonthly: 0,
-    debt_twentyFiveYearInterest: 0
+
+
+function debtCalculator() {
+  const fedLoans = [ 'directSub', 'directUnsub', 'gradPlus', 'parentPlus' ];
+  const otherLoans = [ 'state', 'institutional', 'nonprofit', 'privateLoan1' ];
+  const allLoans = fedLoans.concat( otherLoans );
+  let fin = financialModel.values;
+  let debts = {
+    totalAtGrad: 0,
+    tenYearTotal: 0,
+    tenYearMonthly: 0,
+    tenYearInterest: 0,
+    twentyFiveYearTotal: 0,
+    twentyFiveYearMonthly: 0,
+    twentyFiveYearInterest: 0,
   };
 
-  const modelToCalc = {
-    total_costs: 'tuitionFees',
-    total_grantsScholarships: 'scholarships',
-    total_otherResources: 'savings',
-    fedLoan_directSub: 'directSubsidized',
-    fedLoan_directUnsub: 'directUnsubsidized',
-    privloan_school: 'privateLoan',
-    rate_schoolLoan: 'privateLoanRate',
-    loan_institutional: 'institutionalLoan',
-    rate_institutionalLoan: 'institutionalLoanRate'
-  };
 
-  values = Object.assign( constantsModel.values, data );
+  // Find federal debts at graduation
+  fedLoans.forEach( ( key ) => {
+    // DIRECT Subsidized loans are special
+    if ( key === 'directSub' ) {
+      debts[key] = fin[ 'fedLoan_' + key ] * fin.other_programLength;
+    } else {
+      debts[key] = calcDebtAtGrad( fin[ 'fedLoan_' + key ],
+        fin[ 'rate_' + key ], fin.other_programLength, 6 );
+    }
+  } );
 
-  for ( const key in modelToCalc ) {
-    values[modelToCalc[key]] = getFinancialValue( key );
-  }
+  // calculate debts of other loans
 
-  // 'directPlus' is to avoid a bug in studentDebtCalc
-  values.directPlus = 0;
+  otherLoans.forEach( ( key ) => {
+    debts[key] = calcDebtAtGrad(
+        fin[ 'loan_' + key],
+        fin[ 'rate_' + key ],
+        fin.other_programLength,
+        0
+      );
+  } );
 
-  // Add additional values
-  values.programLength = getStateValue( 'programLength' );
-  values.undergraduate = getStateValue( 'programType' ) !== 'graduate';
-  values.program = getStateValue( 'programType' ) === 'graduate' ? 'grad' : 'ba';
+  // 10 year term calculations.
+  allLoans.forEach( ( key ) => {
+    if ( debts[key] === NaN ) debts[key] = 0;
+    debts.totalAtGrad += debts[key];
+    let tenYearMonthly = calcMonthlyPayment(
+        debts[key],
+        fin[ 'rate_' + key ],
+        10
+      )
+    debts[ key + '_tenYearMonthly' ] = tenYearMonthly;
+    debts[ key + '_tenYearTotal' ] = tenYearMonthly * 120;
+    debts[ key + '_tenYearInterest' ] = (tenYearMonthly * 120 ) - debts[key];
+    debts.tenYearMonthly += tenYearMonthly;
+    debts.tenYearTotal += ( tenYearMonthly * 120 );
 
-  values = studentDebtCalculator( values );
+    // 25 year term calculations
+    let twentyFiveYearMonthly = calcMonthlyPayment(
+        debts[key],
+        fin[ 'rate_' + key ],
+        10
+      )
+    debts[ key + '_twentyFiveYearMonthly' ] = twentyFiveYearMonthly;
+    debts[ key + '_twentyFiveYearTotal' ] = twentyFiveYearMonthly * 300;
+    debts[ key + '_twentyFiveYearInterest' ] = ( twentyFiveYearMonthly * 300 ) - debts[key];
+    debts.twentyFiveYearMonthly += twentyFiveYearMonthly;
+    debts.twentyFiveYearTotal += ( twentyFiveYearMonthly * 300 );
 
-  debtObj.debt_totalAtGrad = Math.round( values.totalDebt );
+  } );
 
-  // Ten year term
-  debtObj.debt_tenYearTotal = Math.round( values.tenYear.loanLifetime );
-  debtObj.debt_tenYearMonthly = Math.round( values.tenYear.loanMonthly );
-  debtObj.debt_tenYearInterest = Math.round( values.tenYear.loanLifetime - values.total_borrowingAtGrad );
+  debts.tenYearInterest = debts.tenYearTotal - debts.totalAtGrad;
+  debts.twentyFiveYearInterest = debts.twentyFiveYearTotal - debts.totalAtGrad;
 
-  // Twenty-five year term
-  debtObj.debt_twentyFiveYearTotal = Math.round( values.twentyFiveYear.loanLifetime );
-  debtObj.debt_twentyFiveYearMonthly = Math.round( values.twentyFiveYear.loanMonthly );
-  debtObj.debt_twentyFiveYearInterest = Math.round( values.twentyFiveYear.loanLifetime - values.total_borrowingAtGrad );
+  // TODO: Apply debts to financialModel
 
-  return debtObj;
-};
+  // TODO: Differentiate grads versus undergrads
+
+  // TODO: Apply the changing DIRECT maxes to DIRECT borrowing
+
+  // TODO: Toggle for parentPlus debt
+
+  console.log( debts );
+
+}
+
 
 export {
   debtCalculator

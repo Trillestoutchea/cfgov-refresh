@@ -7,7 +7,7 @@ import { updateFinancialView } from '../dispatchers/update-view.js';
 
 const constantsModel = {
   values: {},
-  nonNumeric: [],
+  nonNumeric: [ 'constantsYear' ],
   financialValues: {
     rate_directSub: 'subsidizedRate',
     fee_directSub: 'DLOriginationFee',
@@ -39,6 +39,8 @@ const constantsModel = {
               financialModel.values[key] = constantsModel.values[rosetta];
             }
           }
+
+          console.log( 'cm', constantsModel.values );
 
           resolve( true );
         } )

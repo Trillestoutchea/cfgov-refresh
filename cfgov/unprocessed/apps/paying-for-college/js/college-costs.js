@@ -13,7 +13,6 @@ import { navigationView } from './views/navigation-view.js';
 import { schoolModel } from './models/school-model.js';
 import { schoolView } from './views/school-view.js';
 import { stateModel } from './models/state-model.js';
-import { tooltipsView } from './views/tooltips-view.js';
 import { updateSchoolData, updateModelsFromQueryString } from './dispatchers/update-models.js';
 import { updateState } from './dispatchers/update-state.js';
 
@@ -79,7 +78,6 @@ const init = function() {
   financialView.init( body );
   navigationView.init( body );
   chartView.init( body );
-  tooltipsView.init();
   Expandable.init();
 
   financialView.updateFinancialItems();

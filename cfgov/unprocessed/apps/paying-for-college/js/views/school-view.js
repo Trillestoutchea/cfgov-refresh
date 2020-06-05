@@ -58,11 +58,6 @@ const schoolView = {
 
       // Add schoolData to schoolModel
       updateSchoolData( iped );
-      updateFinancialView();
-      updateGradMeterChart();
-      updateRepaymentMeterChart();
-      schoolView.updateSchoolRadioButtons();
-
     }
   },
 
@@ -75,14 +70,6 @@ const schoolView = {
     const prop = input.getAttribute( 'data-state-item' );
     const value = input.value;
     updateState.byProperty( prop, value );
-
-    if ( prop === 'programType' ) {
-      if ( value === 'graduate') {
-        updateState.byProperty( 'program-type', 'grad')
-      } else {
-        updateState.byProperty( 'program-type', 'undergrad')
-      }
-    }
 
     const checkedCount = schoolView._schoolInfo
       .querySelectorAll( 'input[checked="true"]' ).length;
@@ -127,7 +114,14 @@ const schoolView = {
     schoolView._addListeners();
   },
 
-  updateSchoolRadioButtons: () => {
+  updateWithSchoolData: () => {
+    updateFinancialView();
+    updateGradMeterChart();
+    updateRepaymentMeterChart();
+    schoolView._updateSchoolRadioButtons();
+  },
+
+  _updateSchoolRadioButtons: () => {
     const campus = getSchoolValue( 'onCampusAvail' );
     const control = getSchoolValue( 'Public' );
 
@@ -135,6 +129,15 @@ const schoolView = {
     schoolView._searchResults.classList.remove( 'active' );
     schoolView._searchBox.value = getSchoolValue( 'school' );
     schoolView._schoolInfo.classList.add( 'active' );
+  },
+
+  clickRadioButton: ( name, value ) => {
+    console.log( 'clickRadioButton called');
+    console.log( 'INPUT[data-state-item="' + name + '"][value="' + value + '"]' );
+    const input = document.querySelector( 'INPUT[data-state-item="' + name + '"][value="' + value + '"]' );
+    console.log( input );
+    const label = closest( input, '.m-form-field__radio' ).querySelector( 'LABEL' );
+    label.click();
   }
 
 };

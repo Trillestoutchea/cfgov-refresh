@@ -24,10 +24,10 @@ const stateModel = {
   setValue: function( name, value ) {
     if ( name !== 'activeSection' ) {
       stateModel.values[name] = value;
-      this.setStateInDom( name, value );
+      stateModel.setStateInDom( name, value );
     } else if ( value !== stateModel.values.activeSection ) {
       stateModel.values.activeSection = value;
-      window.history.pushState( this.values, null, '' );
+      window.history.pushState( stateModel.values, null, '' );
       updateNavigationView();
     }
     setUrlQueryString();
@@ -43,9 +43,9 @@ const stateModel = {
    */
   setStateInDom: function( property, value ) {
     if ( value === false || value === null ) {
-      this.stateDomElem.removeAttribute( property );
+      stateModel.stateDomElem.removeAttribute( property );
     } else {
-      this.stateDomElem.setAttribute( 'data-state_' + property, value );
+      stateModel.stateDomElem.setAttribute( 'data-state_' + property, value );
     }
   },
 
@@ -54,7 +54,7 @@ const stateModel = {
    */
    _addPopStateListener: function() {
       const events = {
-        popstate: this._handlePopState
+        popstate: stateModel._handlePopState
       };
       bindEvent( window, events );
    },
